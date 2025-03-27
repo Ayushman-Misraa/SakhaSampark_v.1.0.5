@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat | Your Website</title>
+    <link rel="stylesheet" href="../Login page/styles.css">
+    <link rel="stylesheet" href="chat.css">
+    <script src="../Login page/loader.js"></script>
+    <script>
+        // Show loading screen as early as possible
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.Loader) {
+                Loader.show();
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="chat-container">
+        <header class="chat-header">
+            <div class="chat-header-left">
+                <button id="backToContacts" class="back-button">←</button>
+                <div class="contact-info">
+                    <h2 id="contactUsername">Loading...</h2>
+                    <p id="contactPeerId" class="peer-id">Peer ID: Loading...</p>
+                </div>
+                <div id="connectionStatus" class="connection-status connecting">Connecting...</div>
+            </div>
+            <div class="user-info">
+                <h3 id="currentUsername">Loading...</h3>
+                <p id="peerId" class="peer-id">Peer ID: Loading...</p>
+                <button id="logoutBtn" type="button">Logout</button>
+            </div>
+        </header>
+
+        <div class="chat-main">
+            <div id="chatMessages" class="chat-messages">
+                <!-- Messages will be added here dynamically -->
+            </div>
+
+            <form id="chatForm" class="chat-form">
+                <div style="position: relative; flex: 1;">
+                    <div class="file-upload-container">
+                        <button type="button" class="file-upload-btn" title="Send a file">📎</button>
+                        <input type="file" id="fileUpload" class="file-upload" disabled>
+                    </div>
+                    <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." disabled>
+                    <button type="submit" id="sendBtn" class="send-btn" disabled>➤</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="fileTransferProgress" class="file-transfer-progress">
+            <h4 id="fileTransferTitle" class="progress-title">Sending file...</h4>
+            <div class="progress-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+            <div id="progressText" class="progress-text">0%</div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../Login page/firebase-config.js"></script>
+    
+    <!-- PeerJS -->
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="chat.js"></script>
+</body>
+</html>

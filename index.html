@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sakha Sampark - Loading</title>
+    <link rel="stylesheet" href="Login page/loading.css">
+    <style>
+        /* Fade out animation */
+        @keyframes fadeOut {
+            to { opacity: 0; }
+        }
+
+        .fade-out {
+            animation: fadeOut 0.5s forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- Crystal Loader -->
+    <div class="container" id="loaderContainer">
+        <div class="loader">
+            <div class="crystal"></div>
+            <div class="crystal"></div>
+            <div class="crystal"></div>
+            <div class="crystal"></div>
+            <div class="crystal"></div>
+            <div class="crystal"></div>
+        </div>
+        <div class="loading-text">Loading...</div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="Login page/firebase-config.js"></script>
+    <script>
+        // Check authentication and redirect accordingly
+        document.addEventListener('DOMContentLoaded', function() {
+            // First show the loading animation
+            setTimeout(function() {
+                const container = document.getElementById('loaderContainer');
+
+                // Check if user is already logged in
+                firebase.auth().onAuthStateChanged((user) => {
+                    if (user) {
+                        // User is signed in, redirect to connections page
+                        container.classList.add('fade-out');
+                        setTimeout(function() {
+                            window.location.href = 'Conncetions Page/connections.html';
+                        }, 500);
+                    } else {
+                        // No user is signed in, redirect to login page
+                        container.classList.add('fade-out');
+                        setTimeout(function() {
+                            window.location.href = 'Login page/login.html';
+                        }, 500);
+                    }
+                });
+            }, 2000); // Show loading for 2 seconds
+        });
+    </script>
+</body>
+</html>

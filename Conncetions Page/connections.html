@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connections | Your Website</title>
+    <link rel="stylesheet" href="../Login page/styles.css">
+    <link rel="stylesheet" href="connections.css">
+    <script src="../Login page/loader.js"></script>
+    <script>
+        // Show loading screen as early as possible
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.Loader) {
+                Loader.show();
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="connections-container">
+        <header class="connections-header">
+            <div class="user-info">
+                <h2 id="currentUsername">Loading...</h2>
+                <p id="peerId" class="peer-id">Peer ID: Loading...</p>
+            </div>
+            <div class="header-actions">
+                <button id="logoutBtn" type="button">Logout</button>
+            </div>
+        </header>
+
+        <div class="connections-main">
+            <div class="connections-sidebar">
+                <div class="sidebar-section">
+                    <h3>Your Profile</h3>
+                    <div class="profile-card">
+                        <div class="profile-info">
+                            <p id="profileUsername">Loading...</p>
+                            <p id="profilePeerId" class="peer-id">Peer ID: Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Add Contact</h3>
+                    <form id="addContactForm">
+                        <div class="form-group">
+                            <input type="text" id="contactPeerId" placeholder="Enter Peer ID (username)" required>
+                        </div>
+                        <button type="submit" class="btn">Add Contact</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="connections-content">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="contacts">Contacts</button>
+                    <button class="tab-btn" data-tab="requests">Connection Requests</button>
+                </div>
+
+                <div class="tab-content">
+                    <div id="contacts-tab" class="tab-pane active">
+                        <h3>Your Contacts</h3>
+                        <div id="contactsList" class="contacts-list">
+                            <!-- Contacts will be added here dynamically -->
+                            <div class="empty-state">
+                                <p>No contacts yet. Add a contact to start chatting!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="requests-tab" class="tab-pane">
+                        <h3>Connection Requests</h3>
+                        <div id="requestsList" class="requests-list">
+                            <!-- Requests will be added here dynamically -->
+                            <div class="empty-state">
+                                <p>No pending requests.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../Login page/firebase-config.js"></script>
+    
+    <!-- PeerJS -->
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="connections.js"></script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading | Your Website</title>
+    <link rel="stylesheet" href="loading.css">
+</head>
+<body>
+    <!-- Crystal Loader -->
+    <div class="container">
+        <div class="loader">
+            <div class="crystal"></div>
+            <div class="crystal"></div>
+            <div class="crystal"></div>
+            <div class="crystal"></div>
+            <div class="crystal"></div>
+            <div class="crystal"></div>
+        </div>
+        <div class="loading-text">Loading...</div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="loader.js"></script>
+    <script>
+        // Handle redirects based on sessionStorage
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get the target page from sessionStorage
+            const redirectTo = sessionStorage.getItem('redirectTo') || 'login.html';
+            const isLogin = sessionStorage.getItem('isLogin') === 'true';
+            const isSignup = sessionStorage.getItem('isSignup') === 'true';
+
+            // Simulate loading for a minimum time
+            setTimeout(() => {
+                // Handle login authentication
+                if (isLogin) {
+                    const username = sessionStorage.getItem('loginUsername');
+                    const password = sessionStorage.getItem('loginPassword');
+
+                    // Since we can't query the database without authentication,
+                    // we'll use a standard email format based on the username
+                    const email = `${username}@sakhasampark.com`;
+                    console.log('Attempting login with email:', email);
+
+                    // Sign in with email and password
+                    auth.signInWithEmailAndPassword(email, password)
+                        .then((userCredential) => {
+                            console.log('Login successful:', userCredential.user.uid);
+
+                            // Clear login data from sessionStorage
+                            sessionStorage.removeItem('loginUsername');
+                            sessionStorage.removeItem('loginPassword');
+                            sessionStorage.removeItem('isLogin');
+
+                            // Redirect to the connections page instead of index.html
+                            window.location.href = '../Conncetions Page/connections.html';
+                        })
+                        .catch((error) => {
+                            console.error('Login error:', error);
+
+                            // Store error message in sessionStorage
+                            let errorMsg = error.message;
+                            if (error.code === 'auth/wrong-password') {
+                                errorMsg = 'Incorrect password. Please try again.';
+                            } else if (error.code === 'auth/user-not-found') {
+                                errorMsg = 'User not found. Please check your username.';
+                            } else if (error.code === 'auth/invalid-email') {
+                                errorMsg = 'Invalid email format.';
+                            }
+
+                            sessionStorage.setItem('loginError', errorMsg);
+
+                            // Redirect back to login page
+                            window.location.href = 'login.html';
+                        });
+                }
+                // Handle signup
+                else if (isSignup) {
+                    const name = sessionStorage.getItem('signupName');
+                    const username = sessionStorage.getItem('signupUsername');
+                    const password = sessionStorage.getItem('signupPassword');
+
+                    // Create a unique email using the username
+                    const email = `${username}@sakhasampark.com`;
+                    console.log('Creating user with email:', email);
+
+                    // First create the user account
+                    auth.createUserWithEmailAndPassword(email, password)
+                        .then((userCredential) => {
+                            const user = userCredential.user;
+                            console.log('User created successfully:', user.uid);
+
+                            // Now that we're authenticated, we can check if username exists
+                            return database.ref('users').once('value')
+                                .then((snapshot) => {
+                                    if (snapshot.exists()) {
+                                        const users = snapshot.val();
+
+                                        // Check if username is already taken
+                                        for (const uid in users) {
+                                            if (users[uid].username === username && uid !== user.uid) {
+                                                // If username is taken, delete the newly created account
+                                                user.delete();
+                                                throw new Error('Username already taken');
+                                            }
+                                        }
+                                    }
+
+                                    // Username is available, store user data
+                                    return database.ref('users/' + user.uid).set({
+                                        name: name,
+                                        username: username,
+                                        email: email,
+                                        createdAt: new Date().toISOString()
+                                    });
+                                });
+                        })
+                        .then(() => {
+                            console.log('User data stored in database');
+
+                            // Clear signup data from sessionStorage
+                            sessionStorage.removeItem('signupName');
+                            sessionStorage.removeItem('signupUsername');
+                            sessionStorage.removeItem('signupPassword');
+                            sessionStorage.removeItem('isSignup');
+
+                            // Set success message in sessionStorage
+                            sessionStorage.setItem('signupSuccess', 'Account created successfully!');
+
+                            // Redirect to the connections page
+                            window.location.href = '../Conncetions Page/connections.html';
+                        })
+                        .catch((error) => {
+                            console.error('Signup error:', error);
+
+                            // Store error message in sessionStorage
+                            let errorMsg = error.message;
+                            if (error.code === 'auth/email-already-in-use') {
+                                errorMsg = 'This username is already taken. Please choose another one.';
+                            } else if (error.code === 'auth/invalid-email') {
+                                errorMsg = 'Invalid email format.';
+                            } else if (error.code === 'auth/weak-password') {
+                                errorMsg = 'Password is too weak. Please use at least 6 characters.';
+                            }
+
+                            sessionStorage.setItem('signupError', errorMsg);
+
+                            // Redirect back to signup page
+                            window.location.href = 'signup.html';
+                        });
+                }
+                // Simple redirect
+                else {
+                    // Clear redirectTo from sessionStorage
+                    sessionStorage.removeItem('redirectTo');
+
+                    // Redirect to the target page
+                    window.location.href = redirectTo;
+                }
+            }, 3000); // 3 seconds minimum loading time
+        });
+    </script>
+</body>
+</html>

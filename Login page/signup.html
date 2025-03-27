@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | Your Website</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="loader.js"></script>
+    <script>
+        // Show loading screen as early as possible
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.Loader) {
+                Loader.show();
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1>Sign Up</h1>
+            <form id="signupForm">
+                <div class="container">
+                    <input required type="text" id="name" class="input">
+                    <label for="name" class="label">Name</label>
+                </div>
+                
+                <div class="container">
+                    <input required type="text" id="username" class="input">
+                    <label for="username" class="label">Username</label>
+                </div>
+                
+                <div class="container">
+                    <input required type="password" id="password" class="input">
+                    <label for="password" class="label">Password</label>
+                </div>
+                
+                <div class="container">
+                    <input required type="password" id="confirmPassword" class="input">
+                    <label for="confirmPassword" class="label">Confirm Password</label>
+                </div>
+                
+                <button type="submit" class="auth-button">Sign Up</button>
+                
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="login.html" id="loginLink">Login</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="signup.js"></script>
+</body>
+</html>

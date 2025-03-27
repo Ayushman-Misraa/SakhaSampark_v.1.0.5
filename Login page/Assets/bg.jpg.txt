@@ -1,0 +1,8 @@
+This is a placeholder for the bg.jpg file.
+
+Please add a background image file named "bg.jpg" to this folder. This image will be used as the background for the chat and contacts pages.
+
+The image should be:
+- High resolution (at least 1920x1080)
+- Suitable for a background (not too busy or distracting)
+- Preferably with a dark or muted color scheme to ensure text readability
