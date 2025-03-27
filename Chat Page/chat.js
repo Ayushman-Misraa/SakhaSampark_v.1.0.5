@@ -588,19 +588,31 @@ let receivingFile = {
 
 // Start receiving a file
 function receiveFileChunk(data) {
-    if (!receivingFile.inProgress) {
-        console.log('Starting new file reception:', data.fileInfo);
-        receivingFile.inProgress = true;
-        receivingFile.data = [];
-        receivingFile.info = data.fileInfo;
-        receivingFile.fileId = data.fileId;
-        receivingFile.receivedSize = 0;
-
-        // Show progress UI
-        showFileTransferProgress('Receiving file...', 0);
-    }
-
     try {
+        if (!receivingFile.inProgress) {
+            console.log('Starting new file reception:', data.fileInfo);
+
+            // Validate file info
+            if (!data.fileInfo || !data.fileId) {
+                throw new Error('Invalid file data received');
+            }
+
+            receivingFile.inProgress = true;
+            receivingFile.data = [];
+            receivingFile.info = data.fileInfo;
+            receivingFile.fileId = data.fileId;
+            receivingFile.receivedSize = 0;
+
+            // Show progress UI
+            showFileTransferProgress('Receiving file...', 0);
+        }
+
+        // Validate chunk data
+        if (!data.chunk || !(data.chunk instanceof ArrayBuffer)) {
+            console.warn('Invalid chunk data received:', data.chunk);
+            return;
+        }
+
         // Add chunk to received data
         receivingFile.data.push(data.chunk);
         receivingFile.receivedSize += data.chunk.byteLength;
@@ -611,7 +623,17 @@ function receiveFileChunk(data) {
         updateFileTransferProgress(progress);
     } catch (error) {
         console.error('Error processing file chunk:', error);
-        showErrorMessage('Error processing file chunk');
+        showErrorMessage('Error processing file chunk: ' + error.message);
+
+        // Reset file reception state on error
+        receivingFile.inProgress = false;
+        receivingFile.data = [];
+        receivingFile.info = null;
+        receivingFile.fileId = null;
+        receivingFile.receivedSize = 0;
+
+        // Hide progress UI
+        hideFileTransferProgress();
     }
 }
 
@@ -624,24 +646,44 @@ function completeFileReceive(data) {
         return;
     }
 
+    // Validate that we have the necessary data
+    if (!receivingFile.info || !receivingFile.data.length) {
+        console.error('Missing file info or data for reception completion');
+        showErrorMessage('Error: Missing file data');
+        hideFileTransferProgress();
+
+        // Reset file reception state
+        receivingFile.inProgress = false;
+        receivingFile.data = [];
+        receivingFile.info = null;
+        receivingFile.fileId = null;
+        receivingFile.receivedSize = 0;
+        return;
+    }
+
     try {
+        // Store the file name and type before creating the blob
+        const fileName = receivingFile.info.name;
+        const fileType = receivingFile.info.type;
+        const fileId = data.fileId;
+
         // Combine all chunks
         console.log(`Creating blob from ${receivingFile.data.length} chunks, total size: ${receivingFile.receivedSize} bytes`);
-        const fileBlob = new Blob(receivingFile.data, { type: receivingFile.info.type });
+        const fileBlob = new Blob(receivingFile.data, { type: fileType });
         console.log('File blob created, size:', fileBlob.size);
 
         // Store the blob in a global variable to prevent garbage collection
         if (!window.receivedFiles) {
             window.receivedFiles = {};
         }
-        window.receivedFiles[data.fileId] = {
+        window.receivedFiles[fileId] = {
             blob: fileBlob,
-            name: receivingFile.info.name,
-            type: receivingFile.info.type
+            name: fileName,
+            type: fileType
         };
 
         // Update the file message with download link
-        const fileMessageEl = document.getElementById(`file-${data.fileId}`);
+        const fileMessageEl = document.getElementById(`file-${fileId}`);
         if (fileMessageEl) {
             console.log('Found file message element, enabling download button');
             const downloadBtn = fileMessageEl.querySelector('.download-btn');
@@ -649,9 +691,9 @@ function completeFileReceive(data) {
                 downloadBtn.disabled = false;
                 downloadBtn.onclick = function() {
                     // Get the stored file data
-                    const fileData = window.receivedFiles[data.fileId];
+                    const fileData = window.receivedFiles[fileId];
                     if (!fileData) {
-                        console.error('File data not found for ID:', data.fileId);
+                        console.error('File data not found for ID:', fileId);
                         showErrorMessage('File data not found. Please try receiving the file again.');
                         return;
                     }
@@ -687,20 +729,27 @@ function completeFileReceive(data) {
         hideFileTransferProgress();
 
         // Send a system message
-        showSystemMessage(`File "${receivingFile.info.name}" received`);
+        showSystemMessage(`File "${fileName}" received`);
 
         // Send read receipt for the file
         if (activeConnection && activeConnection.open) {
             activeConnection.send({
                 type: 'read-receipt',
-                messageId: `file-${data.fileId}`,
+                messageId: `file-${fileId}`,
                 timestamp: Date.now()
             });
         }
     } catch (error) {
         console.error('Error completing file reception:', error);
-        showErrorMessage('Error completing file reception');
+        showErrorMessage('Error completing file reception: ' + error.message);
         hideFileTransferProgress();
+
+        // Reset file reception state
+        receivingFile.inProgress = false;
+        receivingFile.data = [];
+        receivingFile.info = null;
+        receivingFile.fileId = null;
+        receivingFile.receivedSize = 0;
     }
 }
 
